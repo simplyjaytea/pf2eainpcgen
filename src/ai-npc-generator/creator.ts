@@ -115,7 +115,8 @@ export async function createNpcFromResolved(schema: DeepSeekNpcSchema, { promptU
         flags: { pf2e: { aiNpcGenerator: { prompt: promptUsed } } },
     };
 
-    const actor = (await (game as any).actors.create(src, { render: false })) as any;
+    const ActorClass = (game as any).actors?.documentClass ?? (globalThis as any).Actor;
+    const actor = (await ActorClass.create(src, { render: false })) as any;
 
     const toCreate: any[] = [];
     for (const it of schema.items || []) {

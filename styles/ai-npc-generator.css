@@ -1,0 +1,23 @@
+/* Minimal progress bar for NPC generator */
+.generation-progress {
+  margin-top: 0.75rem;
+}
+.generation-progress .progress-label {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  min-height: 1.1em;
+}
+.generation-progress .progress {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+.generation-progress .bar {
+  height: 100%;
+  width: 0%;
+  background: #4a9eff;
+  transition: width 120ms linear;
+}
+.hidden { display: none !important; }

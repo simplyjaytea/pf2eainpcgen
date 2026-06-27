@@ -106,12 +106,30 @@ class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplication
             return;
         }
 
+        const html = this.element as HTMLElement;
+        const formSec = html.querySelector("section.standard-form") as HTMLElement | null;
+        const progWrap = html.querySelector("[data-generation-progress]") as HTMLElement | null;
+        const labelEl = html.querySelector("[data-progress-label]") as HTMLElement | null;
+        const barEl = html.querySelector("[data-progress-bar]") as HTMLElement | null;
+        const footerBtns = html.querySelectorAll("footer button");
+
+        function setProgress(key: string, pct: number) {
+            const msg = (game as any).i18n.localize(key) || key;
+            if (labelEl) labelEl.textContent = msg;
+            if (barEl) barEl.style.width = `${Math.max(0, Math.min(100, Math.round(pct * 100)))}%`;
+        }
+
+        // Switch UI to progress mode
+        if (formSec) formSec.classList.add("hidden");
+        if (progWrap) progWrap.classList.remove("hidden");
+        footerBtns.forEach((b: any) => b.disabled = true);
+
         const client = new DeepSeekClient(apiKey);
-        const prog = ui.notifications.info("PF2E.Actor.AiNpcGenerator.Generating", { progress: true });
+        setProgress("PF2E.Actor.AiNpcGenerator.Generating", 0.05);
 
         try {
             const schema = await client.generateNpc(prompt, level);
-            prog.update({ message: "PF2E.Actor.AiNpcGenerator.Resolving", pct: 0.4 });
+            setProgress("PF2E.Actor.AiNpcGenerator.Resolving", 0.4);
 
             const { resolved, warnings } = await resolveNpcData(schema);
             if (warnings.length) {
@@ -123,25 +141,31 @@ class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplication
                     yes: { default: true },
                 });
                 if (!ok) {
-                    prog.update({ message: "Cancelled", pct: 1 });
+                    setProgress("Cancelled", 1);
+                    footerBtns.forEach((b: any) => b.disabled = false);
                     return;
                 }
             }
 
-            prog.update({ message: "PF2E.Actor.AiNpcGenerator.Creating", pct: 0.7 });
+            setProgress("PF2E.Actor.AiNpcGenerator.Creating", 0.7);
             const actor = await createNpcFromResolved(resolved, { promptUsed: prompt });
-            prog.update({ message: "PF2E.Actor.AiNpcGenerator.Done", pct: 1 });
+            setProgress("PF2E.Actor.AiNpcGenerator.Done", 1);
+
             ui.notifications.info(`Created ${actor.name}`);
             actor.sheet.render(true);
-            // Close this dialog reliably (we are in a static handler)
-            try {
-                const app = (foundry as any)?.applications?.instances?.get?.("pf2e-ai-npc-generator");
-                app?.close?.();
-            } catch { /* ignore */ }
+
+            // Close after short delay so user sees 100%
+            setTimeout(() => {
+                try {
+                    const app = (foundry as any)?.applications?.instances?.get?.("pf2e-ai-npc-generator");
+                    app?.close?.();
+                } catch { /* ignore */ }
+            }, 350);
         } catch (e: any) {
             console.error(e);
-            prog.update({ message: "PF2E.Actor.AiNpcGenerator.Failed", pct: 1 });
+            setProgress("PF2E.Actor.AiNpcGenerator.Failed", 1);
             ui.notifications.error("PF2E.Actor.AiNpcGenerator.FailedDetails", { localize: true, format: { message: String(e?.message || e) } });
+            footerBtns.forEach((b: any) => b.disabled = false);
         }
     }
 }

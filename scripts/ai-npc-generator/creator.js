@@ -109,7 +109,8 @@ export async function createNpcFromResolved(schema, { promptUsed = "" } = {}) {
         prototypeToken: { texture: { src: "systems/pf2e/icons/default-icons/npc.svg" }, actorLink: false },
         flags: { pf2e: { aiNpcGenerator: { prompt: promptUsed } } },
     };
-    const actor = (await game.actors.create(src, { render: false }));
+    const ActorClass = game.actors?.documentClass ?? globalThis.Actor;
+    const actor = (await ActorClass.create(src, { render: false }));
     const toCreate = [];
     for (const it of schema.items || []) {
         if (it.type === "weapon") {

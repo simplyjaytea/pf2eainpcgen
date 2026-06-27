@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-06-27
+
+### Fixed
+- NPC creation: replaced `game.actors.create` with `ActorClass.create` (via `game.actors.documentClass` or global `Actor`) for Foundry v13 compatibility. This resolves "game.actors.create is not a function".
+- Dialog now shows an in-dialog progress bar (Generating → Resolving → Creating → Done) instead of relying on notification progress.
+- Added `styles/ai-npc-generator.css` and wired it in `module.json`.
+
 ## [0.2.0] - 2026-06-27
 
 ### Added
