@@ -12,7 +12,6 @@ function clamp(n: number, lo: number, hi: number) {
 class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) as any) {
     static DEFAULT_OPTIONS = {
         id: "pf2e-ai-npc-generator",
-        tag: "form",
         window: { icon: "fa-solid fa-dice-d20", title: "PF2E.Actor.AiNpcGenerator.Title", contentClasses: ["standard-form"] },
         position: { width: 480 },
         form: { handler: (NpcGeneratorDialog as any).#onSubmit, closeOnSubmit: false },

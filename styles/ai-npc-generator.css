@@ -1,11 +1,10 @@
 /* PF2e AI NPC Generator - strict V2 Application only (no V1 FormApplication etc) */
 
-#pf2e-ai-npc-generator {
-  /* Force a containing block so our internal absolute overlay cannot escape
-     and affect sidebars or global layout. Pure V2. */
-  position: relative;
-}
-
+/* Strict V2: create a solid containing block for the internal overlay.
+   This prevents the absolute progress layer from escaping and affecting
+   sidebars or global UI layout. */
+#pf2e-ai-npc-generator,
+#pf2e-ai-npc-generator .window-content,
 #pf2e-ai-npc-generator .generator-content {
   position: relative;
 }

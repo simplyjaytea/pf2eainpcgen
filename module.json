@@ -1,7 +1,7 @@
 {
   "id": "pf2e-ai-npc-generator",
   "title": "PF2e AI NPC Generator",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
