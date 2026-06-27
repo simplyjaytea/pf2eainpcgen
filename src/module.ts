@@ -29,29 +29,45 @@ Hooks.once("init", () => {
 Hooks.on("renderActorDirectoryPF2e", (app: any, html: any) => {
     if (!(game as any).user.isGM) return;
 
-    // Resolve a root element/jQuery we can search within
-    let $root: any = null;
-    if (app?.element) {
-        $root = app.element instanceof HTMLElement ? $(app.element) : $(app.element);
-    } else if (html) {
-        $root = (html.find && typeof html.find === "function") ? html : $(html);
-    }
-    if (!$root) return;
+    const tryAdd = () => {
+        // Support both raw HTMLElement and jQuery passed by the hook
+        let root = app?.element ?? html;
+        if (!root) return;
 
-    const $footer = $root.find("footer.directory-footer");
-    if (!$footer.length) return;
+        const $root = root instanceof HTMLElement ? $(root) : $(root);
+        if (!$root || !$root.length) return;
 
-    // Avoid adding the button multiple times
-    if ($footer.find("button[data-action='ai-generate-npc']").length) return;
+        let $footer = $root.find("footer.directory-footer");
+        if (!$footer.length) $footer = $root.find("footer");
+        if (!$footer.length) {
+            // Footer might not be in the DOM yet on first render pass
+            setTimeout(tryAdd, 120);
+            return;
+        }
 
-    const label = (game as any).i18n?.localize?.("PF2E.Actor.AiNpcGenerator.Title") || "Generate NPC";
-    const btn = $(`
-    <button type="button" data-action="ai-generate-npc">
-      <i class="fa-solid fa-dice-d20"></i> ${label}
-    </button>
-  `);
-    btn.on("click", () => launchNpcGenerator());
-    $footer.append(btn);
+        if ($footer.find("[data-action='ai-generate-npc']").length) return;
+
+        const label = (game as any).i18n?.localize?.("PF2E.Actor.AiNpcGenerator.Generate") || "Generate NPC";
+        const $btn = $(`
+      <button type="button" data-action="ai-generate-npc">
+        <i class="fa-solid fa-dice-d20"></i> ${label}
+      </button>
+    `);
+
+        $btn.on("click", (ev: any) => {
+            ev.preventDefault();
+            try {
+                launchNpcGenerator();
+            } catch (e: any) {
+                console.error(e);
+                (ui as any).notifications?.error?.("Failed to open PF2e AI NPC Generator");
+            }
+        });
+
+        $footer.append($btn);
+    };
+
+    tryAdd();
 });
 
 (globalThis as any).pf2eAiNpcGenerator = {

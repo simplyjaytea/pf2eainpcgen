@@ -12,7 +12,7 @@
   "PF2E.Actor.AiNpcGenerator.WarningsIntro": "The following slugs could not be matched exactly and will be substituted or skipped:",
   "PF2E.Actor.AiNpcGenerator.ProceedAnyway": "Proceed anyway?",
 
-  "PF2E.Actor.AiNpcGenerator.EncounterBuilder": "Encounter Builder",
+  "PF2E.Actor.AiNpcGenerator.EncounterBuilder.Title": "Encounter Builder",
   "PF2E.Actor.AiNpcGenerator.EncounterBuilder.ComingSoon": "Coming soon",
   "PF2E.Actor.AiNpcGenerator.EncounterBuilder.PartyLevel": "Party Level",
   "PF2E.Actor.AiNpcGenerator.EncounterBuilder.NumNPCs": "Number of NPCs",

@@ -31,7 +31,7 @@ class NpcGeneratorDialog extends foundry.applications.api.HandlebarsApplicationM
             lastPrompt,
             lastLevel,
             encLabels: {
-                title: i18n?.localize("PF2E.Actor.AiNpcGenerator.EncounterBuilder") || "Encounter Builder",
+                title: i18n?.localize("PF2E.Actor.AiNpcGenerator.EncounterBuilder.Title") || "Encounter Builder",
                 coming: i18n?.localize("PF2E.Actor.AiNpcGenerator.EncounterBuilder.ComingSoon") || "Coming soon",
                 party: i18n?.localize("PF2E.Actor.AiNpcGenerator.EncounterBuilder.PartyLevel") || "Party Level",
                 num: i18n?.localize("PF2E.Actor.AiNpcGenerator.EncounterBuilder.NumNPCs") || "Number of NPCs",
