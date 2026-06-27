@@ -1,0 +1,14 @@
+{
+  "PF2E.Actor.AiNpcGenerator.Title": "PF2e AI NPC Generator",
+  "PF2E.Actor.AiNpcGenerator.Generate": "Generate NPC",
+  "PF2E.Actor.AiNpcGenerator.NoApiKey": "Set your DeepSeek API key in settings (Client).",
+  "PF2E.Actor.AiNpcGenerator.Generating": "Contacting DeepSeek…",
+  "PF2E.Actor.AiNpcGenerator.Resolving": "Resolving compendium slugs…",
+  "PF2E.Actor.AiNpcGenerator.Creating": "Creating NPC…",
+  "PF2E.Actor.AiNpcGenerator.Done": "NPC created.",
+  "PF2E.Actor.AiNpcGenerator.Failed": "Generation failed.",
+  "PF2E.Actor.AiNpcGenerator.FailedDetails": "Generation failed: {message}",
+  "PF2E.Actor.AiNpcGenerator.WarningsTitle": "Compendium Slug Warnings",
+  "PF2E.Actor.AiNpcGenerator.WarningsIntro": "The following slugs could not be matched exactly and will be substituted or skipped:",
+  "PF2E.Actor.AiNpcGenerator.ProceedAnyway": "Proceed anyway?"
+}

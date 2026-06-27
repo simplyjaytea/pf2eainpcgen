@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+.env
+.vscode/
+.idea/
+
+# Built output is committed for easy "git clone + enable" usage in Foundry.
+# If you prefer to exclude it, uncomment the next line and run `npm run clean` before commits.
+# scripts/

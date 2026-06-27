@@ -1,0 +1,17 @@
+{
+  "name": "pf2e-ai-npc-generator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rimraf scripts"
+  },
+  "devDependencies": {
+    "@league-of-foundry-developers/foundry-vtt-types": "^12.331.3",
+    "@types/jquery": "^3.5.30",
+    "typescript": "^5.5.0",
+    "rimraf": "^5.0.0"
+  }
+}
