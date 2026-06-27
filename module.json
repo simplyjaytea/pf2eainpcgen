@@ -42,8 +42,8 @@
       "aiNpcGenerator": true
     }
   },
-  "url": "https://github.com/<yourname>/pf2e-ai-npc-generator",
-  "manifest": "",
-  "download": "",
+  "url": "https://github.com/simplyjaytea/pf2eainpcgen",
+  "manifest": "https://github.com/simplyjaytea/pf2eainpcgen/releases/download/v0.2.0/module.json",
+  "download": "https://github.com/simplyjaytea/pf2eainpcgen/releases/download/v0.2.0/pf2e-ai-npc-generator.zip",
   "description": "GM-only AI-powered NPC generator for PF2e. Uses DeepSeek to create fully automated, compendium-driven NPCs (weapons in inventory, linked strikes, optimize pass)."
 }

@@ -117,4 +117,4 @@ Open an issue with:
 - [ ] Push the manifest URL so people can use "Install Module" in Foundry
 
 Example manifest URL after tagging v0.2.0:
-`https://github.com/<you>/pf2e-ai-npc-generator/releases/download/v0.2.0/module.json`
+`https://github.com/simplyjaytea/pf2eainpcgen/releases/download/v0.2.0/module.json`
