@@ -3,14 +3,15 @@
 GM-only AI-powered NPC generator for the **Pathfinder 2e** Foundry system.
 
 - Uses **DeepSeek** (OpenAI-compatible) to generate a small prompt + level into a fully automated, compendium-driven NPC.
-- Weapons are placed in inventory as physical items.
-- Melee strikes are synthesized and linked (`flags.pf2e.linkedWeapon`) using the same logic as bestiary NPCs.
-- Attachments/subitems are supported.
-- Always runs an optimize pass (level-based DC + HP adjustment).
-- Hybrid slug handling: warns + explicit user confirmation for substitutes.
-- Default images for generated NPCs.
+- Weapons placed in inventory; linked melee strikes (`flags.pf2e.linkedWeapon`).
+- AI chooses level-appropriate **weapons, armor, feats, and consumables** from compendiums.
+- Modal progress overlay (Contacting → Resolving → Creating → Finalizing).
+- Strong base prompt + your text as a modifier.
 - Remembers last prompt + level (client-scoped).
 - Button labeled **"Generate NPC"** (d20 icon) in the Actors sidebar footer (GM-only).
+- Encounter Builder section present but disabled ("Coming soon").
+- Always runs an optimize pass (level-based DC + HP).
+- Hybrid slug handling with user confirmation for substitutes.
 
 ## Requirements
 
@@ -20,21 +21,26 @@ GM-only AI-powered NPC generator for the **Pathfinder 2e** Foundry system.
 
 ## Install
 
-### From this repo (dev)
-1. Clone or download this folder.
-2. Copy the folder into your Foundry `Data/modules/pf2e-ai-npc-generator`.
-3. Restart Foundry / refresh the world.
-4. Enable the module in **Manage Modules**.
-5. As GM, open the **Actors** sidebar — you’ll see a **"Generate NPC"** button in the footer.
+### Fast dev install (recommended for updates)
+This repo publishes from `main` on every push:
 
-### From a release (future)
-Use the **Install Module** button in Foundry and paste the manifest URL.
+1. In Foundry → **Install Module** → paste:
+   `https://raw.githubusercontent.com/simplyjaytea/pf2eainpcgen/main/module.json`
+2. Enable the module.
+3. As GM, open the **Actors** sidebar — look for the **"Generate NPC"** button.
+
+After any fix we bump the version, so Foundry will detect the update on refresh.
+
+### Manual / git clone
+1. Clone this repo.
+2. Copy into `Data/modules/pf2e-ai-npc-generator`.
+3. `npm install && npm run build`.
+4. Enable + restart world.
 
 ## Setup
 
 1. As GM, go to **Configure Settings → Module Settings → PF2e AI NPC Generator**.
-2. Paste your DeepSeek API key (client-scoped).
-3. (Optional) You can also paste/override the key in the dialog’s **Advanced** section.
+2. Paste your DeepSeek API key (client-scoped only). It never appears in the generator dialog.
 
 ## Usage
 
@@ -44,10 +50,10 @@ Use the **Install Module** button in Foundry and paste the manifest URL.
 4. Click **Generate**.
 5. If any slugs can’t be resolved exactly, you’ll see a confirmation dialog listing substitutes.
 6. On success, the NPC is created with:
-   - Weapons in inventory (held)
+   - Weapons/armor in inventory
    - Linked melee attacks
-   - Optimized base HP
-   - Default NPC artwork
+   - Feats and consumables as requested by the model
+   - Optimized base HP + default NPC artwork
 
 The sheet opens automatically.
 
@@ -57,9 +63,9 @@ The sheet opens automatically.
 2. Resolver loads compendium indices (weapons/actions/spells) and does fuzzy slug matching.
 3. Creator:
    - Creates the NPC
-   - Places weapons as physical items (inventory)
-   - Generates linked melee via `WeaponPF2e#toNPCAttacks`
-   - Adds other items (actions, spells, lore, consumables)
+   - Resolves weapons/armor/feats/consumables from compendiums (or minimal fallbacks)
+   - Places items in inventory, generates linked melee via `toNPCAttacks`
+   - Adds actions/spells/lore
    - Applies HP optimization
 4. Always ends with `actor.reset()` so derived data (strikes, MAP, REs) is correct.
 
