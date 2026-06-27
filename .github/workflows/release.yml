@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: "npm"
 
       - name: Install deps
@@ -28,21 +28,17 @@ jobs:
 
       - name: Prepare release zip
         run: |
+          set -e
           mkdir -p dist
-          # Stage only the files we want to ship, under the module id folder
           rm -rf staging
           mkdir -p staging/pf2e-ai-npc-generator
-          rsync -a \
-            --exclude 'node_modules' \
-            --exclude '.git' \
-            --exclude 'src' \
-            --exclude 'package*.json' \
-            --exclude 'tsconfig.json' \
-            --exclude '.github' \
-            --exclude 'dist' \
-            --exclude 'staging' \
-            --exclude '.gitignore' \
-            . staging/pf2e-ai-npc-generator/
+          # Copy only shippable files (include built scripts/, exclude dev sources)
+          find . -mindepth 1 -maxdepth 1 \
+            ! -name 'node_modules' ! -name '.git' ! -name 'src' \
+            ! -name 'package.json' ! -name 'package-lock.json' \
+            ! -name 'tsconfig.json' ! -name '.github' ! -name 'dist' \
+            ! -name 'staging' ! -name '.gitignore' ! -name '.gitattributes' \
+            -exec cp -a {} staging/pf2e-ai-npc-generator/ \;
           cd staging
           zip -r ../dist/pf2e-ai-npc-generator.zip pf2e-ai-npc-generator
           cd ..

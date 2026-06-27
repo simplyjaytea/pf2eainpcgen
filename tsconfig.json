@@ -11,6 +11,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+
     "types": ["@league-of-foundry-developers/foundry-vtt-types"]
   },
   "include": ["src/**/*", "src/foundry.d.ts"],
