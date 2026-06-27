@@ -29,19 +29,24 @@ jobs:
       - name: Prepare release zip
         run: |
           mkdir -p dist
-          # Create a zip that contains the module folder at the root of the zip
-          # This is what Foundry's "Install Module" expects when it extracts
+          # Stage only the files we want to ship, under the module id folder
+          rm -rf staging
+          mkdir -p staging/pf2e-ai-npc-generator
+          rsync -a \
+            --exclude 'node_modules' \
+            --exclude '.git' \
+            --exclude 'src' \
+            --exclude 'package*.json' \
+            --exclude 'tsconfig.json' \
+            --exclude '.github' \
+            --exclude 'dist' \
+            --exclude 'staging' \
+            --exclude '.gitignore' \
+            . staging/pf2e-ai-npc-generator/
+          cd staging
+          zip -r ../dist/pf2e-ai-npc-generator.zip pf2e-ai-npc-generator
           cd ..
-          zip -r pf2e-ai-npc-generator/pf2e-ai-npc-generator.zip pf2e-ai-npc-generator \
-            -x "pf2e-ai-npc-generator/node_modules/*" \
-            -x "pf2e-ai-npc-generator/.git/*" \
-            -x "pf2e-ai-npc-generator/src/*" \
-            -x "pf2e-ai-npc-generator/*.ts" \
-            -x "pf2e-ai-npc-generator/package*.json" \
-            -x "pf2e-ai-npc-generator/tsconfig.json" \
-            -x "pf2e-ai-npc-generator/.github/*" \
-            -x "pf2e-ai-npc-generator/dist/*"
-          mv pf2e-ai-npc-generator/pf2e-ai-npc-generator.zip pf2e-ai-npc-generator/dist/
+          rm -rf staging
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
