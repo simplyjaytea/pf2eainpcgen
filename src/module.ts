@@ -30,31 +30,30 @@ Hooks.on("renderActorDirectoryPF2e", (app: any, html: any) => {
     if (!(game as any).user.isGM) return;
 
     const tryAdd = () => {
-        // Support both raw HTMLElement and jQuery passed by the hook
-        let root = app?.element ?? html;
+        let root: HTMLElement | null = null;
+        if (app?.element instanceof HTMLElement) root = app.element;
+        else if (html instanceof HTMLElement) root = html;
+        else if (html && typeof html.find === "function") {
+            const el = html[0] || html.find?.("footer")?.[0];
+            if (el) root = el as HTMLElement;
+        }
         if (!root) return;
 
-        const $root = root instanceof HTMLElement ? $(root) : $(root);
-        if (!$root || !$root.length) return;
-
-        let $footer = $root.find("footer.directory-footer");
-        if (!$footer.length) $footer = $root.find("footer");
-        if (!$footer.length) {
-            // Footer might not be in the DOM yet on first render pass
+        let footer = root.querySelector("footer.directory-footer") || root.querySelector("footer");
+        if (!footer) {
             setTimeout(tryAdd, 120);
             return;
         }
 
-        if ($footer.find("[data-action='ai-generate-npc']").length) return;
+        if (footer.querySelector("[data-action='ai-generate-npc']")) return;
 
         const label = (game as any).i18n?.localize?.("PF2E.Actor.AiNpcGenerator.Generate") || "Generate NPC";
-        const $btn = $(`
-      <button type="button" data-action="ai-generate-npc">
-        <i class="fa-solid fa-dice-d20"></i> ${label}
-      </button>
-    `);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.dataset.action = "ai-generate-npc";
+        btn.innerHTML = `<i class="fa-solid fa-dice-d20"></i> ${label}`;
 
-        $btn.on("click", (ev: any) => {
+        btn.addEventListener("click", (ev) => {
             ev.preventDefault();
             try {
                 launchNpcGenerator();
@@ -64,7 +63,7 @@ Hooks.on("renderActorDirectoryPF2e", (app: any, html: any) => {
             }
         });
 
-        $footer.append($btn);
+        footer.appendChild(btn);
     };
 
     tryAdd();

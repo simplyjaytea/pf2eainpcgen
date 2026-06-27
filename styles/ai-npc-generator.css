@@ -1,40 +1,45 @@
-/* PF2e AI NPC Generator styles - clean + modal generating */
+/* PF2e AI NPC Generator - strict V2 Application only (no V1 FormApplication etc) */
 
-#pf2e-ai-npc-generator,
-form#pf2e-ai-npc-generator {
+#pf2e-ai-npc-generator {
+  /* Force a containing block so our internal absolute overlay cannot escape
+     and affect sidebars or global layout. Pure V2. */
   position: relative;
 }
 
-.generator-body {
+#pf2e-ai-npc-generator .generator-content {
+  position: relative;
+}
+
+#pf2e-ai-npc-generator .generator-body {
   min-width: 420px;
 }
 
-.level-row .form-fields {
+#pf2e-ai-npc-generator .level-row .form-fields {
   align-items: center;
   gap: 8px;
 }
-.level-dc {
+#pf2e-ai-npc-generator .level-dc {
   font-size: 0.85em;
   opacity: 0.85;
   white-space: nowrap;
 }
 
 /* Encounter Builder (UI only) */
-.encounter-builder {
+#pf2e-ai-npc-generator .encounter-builder {
   margin-top: 12px;
   padding: 10px 12px;
   border: 1px solid var(--color-border, #555);
   border-radius: 6px;
   background: rgba(255,255,255,0.03);
 }
-.encounter-builder h4 {
+#pf2e-ai-npc-generator .encounter-builder h4 {
   margin: 0 0 6px 0;
   font-size: 0.9em;
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.encounter-builder .badge {
+#pf2e-ai-npc-generator .encounter-builder .badge {
   font-size: 0.7em;
   padding: 1px 6px;
   border-radius: 999px;
@@ -43,48 +48,48 @@ form#pf2e-ai-npc-generator {
   text-transform: uppercase;
   letter-spacing: .5px;
 }
-.enc-grid {
+#pf2e-ai-npc-generator .enc-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 8px;
   margin-bottom: 6px;
 }
-.enc-field label {
+#pf2e-ai-npc-generator .enc-field label {
   font-size: 0.75em;
   opacity: 0.8;
   display: block;
   margin-bottom: 2px;
 }
-.enc-field input,
-.enc-field select {
+#pf2e-ai-npc-generator .enc-field input,
+#pf2e-ai-npc-generator .enc-field select {
   width: 100%;
   box-sizing: border-box;
 }
-.enc-value {
+#pf2e-ai-npc-generator .enc-value {
   font-weight: 600;
   padding: 4px 6px;
   background: rgba(0,0,0,0.2);
   border-radius: 4px;
 }
-.enc-roles {
+#pf2e-ai-npc-generator .enc-roles {
   display: flex;
   gap: 4px;
   margin-bottom: 6px;
 }
-.role-pill {
+#pf2e-ai-npc-generator .role-pill {
   font-size: 0.7em;
   padding: 1px 6px;
   border: 1px solid var(--color-border, #555);
   border-radius: 999px;
   opacity: 0.7;
 }
-.enc-btn {
+#pf2e-ai-npc-generator .enc-btn {
   width: 100%;
   margin-top: 4px;
 }
 
 /* Modal generating overlay */
-.generator-overlay {
+#pf2e-ai-npc-generator .generator-overlay {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.75);
@@ -94,16 +99,16 @@ form#pf2e-ai-npc-generator {
   z-index: 100;
   border-radius: inherit;
 }
-.generator-overlay.hidden {
+#pf2e-ai-npc-generator .generator-overlay.hidden {
   display: none !important;
 }
-.generator-overlay-content {
+#pf2e-ai-npc-generator .generator-overlay-content {
   width: 82%;
   max-width: 320px;
   text-align: center;
   color: #eee;
 }
-.gen-spinner {
+#pf2e-ai-npc-generator .gen-spinner {
   width: 28px;
   height: 28px;
   margin: 0 auto 10px;
@@ -114,52 +119,49 @@ form#pf2e-ai-npc-generator {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.gen-title {
+#pf2e-ai-npc-generator .gen-title {
   font-weight: 600;
   font-size: 0.95em;
   margin-bottom: 4px;
 }
-.gen-status {
+#pf2e-ai-npc-generator .gen-status {
   font-size: 0.8em;
   opacity: 0.85;
   min-height: 1.2em;
   margin-bottom: 8px;
 }
-.gen-progress {
+#pf2e-ai-npc-generator .gen-progress {
   height: 6px;
   background: rgba(255,255,255,0.15);
   border-radius: 999px;
   overflow: hidden;
   margin-bottom: 10px;
 }
-.gen-progress .bar {
+#pf2e-ai-npc-generator .gen-progress .bar {
   height: 100%;
   width: 5%;
   background: #4a9eff;
   transition: width 180ms linear;
 }
-.gen-steps {
+#pf2e-ai-npc-generator .gen-steps {
   display: flex;
   justify-content: center;
   gap: 6px;
   margin-bottom: 6px;
   flex-wrap: wrap;
 }
-.gen-steps .step {
+#pf2e-ai-npc-generator .gen-steps .gen-step {
   font-size: 0.7em;
   padding: 1px 6px;
   border-radius: 999px;
   background: rgba(255,255,255,0.1);
   opacity: 0.6;
 }
-.gen-steps .step.active {
+#pf2e-ai-npc-generator .gen-steps .gen-step.active {
   opacity: 1;
   background: rgba(74, 158, 255, 0.25);
 }
-.gen-hint {
+#pf2e-ai-npc-generator .gen-hint {
   font-size: 0.7em;
   opacity: 0.6;
 }
-
-/* General */
-.hidden { display: none !important; }

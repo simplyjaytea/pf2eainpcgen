@@ -15,7 +15,7 @@ class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplication
         tag: "form",
         window: { icon: "fa-solid fa-dice-d20", title: "PF2E.Actor.AiNpcGenerator.Title", contentClasses: ["standard-form"] },
         position: { width: 480 },
-        form: { handler: (NpcGeneratorDialog as any).#onSubmit },
+        form: { handler: (NpcGeneratorDialog as any).#onSubmit, closeOnSubmit: false },
     };
 
     static PARTS = {

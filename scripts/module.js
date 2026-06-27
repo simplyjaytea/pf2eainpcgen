@@ -28,30 +28,31 @@ Hooks.on("renderActorDirectoryPF2e", (app, html) => {
     if (!game.user.isGM)
         return;
     const tryAdd = () => {
-        // Support both raw HTMLElement and jQuery passed by the hook
-        let root = app?.element ?? html;
+        let root = null;
+        if (app?.element instanceof HTMLElement)
+            root = app.element;
+        else if (html instanceof HTMLElement)
+            root = html;
+        else if (html && typeof html.find === "function") {
+            const el = html[0] || html.find?.("footer")?.[0];
+            if (el)
+                root = el;
+        }
         if (!root)
             return;
-        const $root = root instanceof HTMLElement ? $(root) : $(root);
-        if (!$root || !$root.length)
-            return;
-        let $footer = $root.find("footer.directory-footer");
-        if (!$footer.length)
-            $footer = $root.find("footer");
-        if (!$footer.length) {
-            // Footer might not be in the DOM yet on first render pass
+        let footer = root.querySelector("footer.directory-footer") || root.querySelector("footer");
+        if (!footer) {
             setTimeout(tryAdd, 120);
             return;
         }
-        if ($footer.find("[data-action='ai-generate-npc']").length)
+        if (footer.querySelector("[data-action='ai-generate-npc']"))
             return;
         const label = game.i18n?.localize?.("PF2E.Actor.AiNpcGenerator.Generate") || "Generate NPC";
-        const $btn = $(`
-      <button type="button" data-action="ai-generate-npc">
-        <i class="fa-solid fa-dice-d20"></i> ${label}
-      </button>
-    `);
-        $btn.on("click", (ev) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.dataset.action = "ai-generate-npc";
+        btn.innerHTML = `<i class="fa-solid fa-dice-d20"></i> ${label}`;
+        btn.addEventListener("click", (ev) => {
             ev.preventDefault();
             try {
                 launchNpcGenerator();
@@ -61,7 +62,7 @@ Hooks.on("renderActorDirectoryPF2e", (app, html) => {
                 ui.notifications?.error?.("Failed to open PF2e AI NPC Generator");
             }
         });
-        $footer.append($btn);
+        footer.appendChild(btn);
     };
     tryAdd();
 });
