@@ -26,23 +26,26 @@ jobs:
       - name: Build
         run: npm run build --if-present
 
+      - name: Install zip
+        run: sudo apt-get update -y && sudo apt-get install -y zip
+
       - name: Prepare release zip
         run: |
           set -e
           mkdir -p dist
-          rm -rf staging
-          mkdir -p staging/pf2e-ai-npc-generator
-          # Copy only shippable files (include built scripts/, exclude dev sources)
-          find . -mindepth 1 -maxdepth 1 \
-            ! -name 'node_modules' ! -name '.git' ! -name 'src' \
-            ! -name 'package.json' ! -name 'package-lock.json' \
-            ! -name 'tsconfig.json' ! -name '.github' ! -name 'dist' \
-            ! -name 'staging' ! -name '.gitignore' ! -name '.gitattributes' \
-            -exec cp -a {} staging/pf2e-ai-npc-generator/ \;
-          cd staging
-          zip -r ../dist/pf2e-ai-npc-generator.zip pf2e-ai-npc-generator
-          cd ..
-          rm -rf staging
+          # Create zip with module files at archive root (standard for Foundry module installs)
+          # Exclude dev-only sources, deps, and CI config
+          zip -r dist/pf2e-ai-npc-generator.zip . \
+            -x "node_modules/*" \
+               ".git/*" \
+               "src/*" \
+               "package.json" \
+               "package-lock.json" \
+               "tsconfig.json" \
+               ".github/*" \
+               "dist/*" \
+               ".gitignore" \
+               ".gitattributes"
 
       - name: Prepare module.json for release
         run: |
