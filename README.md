@@ -104,3 +104,17 @@ Open an issue with:
 - Prompt + level used
 - Any warnings shown
 - Console errors (F12)
+
+## Release Checklist
+
+- [ ] Bump `version` in `module.json`
+- [ ] Update `verified` Foundry/PF2e versions if needed
+- [ ] Run `npm run build` (ensure `scripts/` is up to date)
+- [ ] Commit & push
+- [ ] Create a GitHub Release (tag = `vX.Y.Z`)
+- [ ] Attach a `.zip` of the module folder (optional but friendly)
+- [ ] Fill in `manifest` + `download` in `module.json` pointing to the release assets
+- [ ] Push the manifest URL so people can use "Install Module" in Foundry
+
+Example manifest URL after tagging v0.2.0:
+`https://github.com/<you>/pf2e-ai-npc-generator/releases/download/v0.2.0/module.json`
