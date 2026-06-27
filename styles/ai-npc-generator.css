@@ -1,23 +1,165 @@
-/* Minimal progress bar for NPC generator */
-.generation-progress {
-  margin-top: 0.75rem;
+/* PF2e AI NPC Generator styles - clean + modal generating */
+
+#pf2e-ai-npc-generator,
+form#pf2e-ai-npc-generator {
+  position: relative;
 }
-.generation-progress .progress-label {
-  font-size: 0.85rem;
+
+.generator-body {
+  min-width: 420px;
+}
+
+.level-row .form-fields {
+  align-items: center;
+  gap: 8px;
+}
+.level-dc {
+  font-size: 0.85em;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+/* Encounter Builder (UI only) */
+.encounter-builder {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border, #555);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
+}
+.encounter-builder h4 {
+  margin: 0 0 6px 0;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.encounter-builder .badge {
+  font-size: 0.7em;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #555;
+  color: #ddd;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.enc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.enc-field label {
+  font-size: 0.75em;
+  opacity: 0.8;
+  display: block;
+  margin-bottom: 2px;
+}
+.enc-field input,
+.enc-field select {
+  width: 100%;
+  box-sizing: border-box;
+}
+.enc-value {
+  font-weight: 600;
+  padding: 4px 6px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+.enc-roles {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.role-pill {
+  font-size: 0.7em;
+  padding: 1px 6px;
+  border: 1px solid var(--color-border, #555);
+  border-radius: 999px;
+  opacity: 0.7;
+}
+.enc-btn {
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* Modal generating overlay */
+.generator-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  border-radius: inherit;
+}
+.generator-overlay.hidden {
+  display: none !important;
+}
+.generator-overlay-content {
+  width: 82%;
+  max-width: 320px;
+  text-align: center;
+  color: #eee;
+}
+.gen-spinner {
+  width: 28px;
+  height: 28px;
+  margin: 0 auto 10px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.gen-title {
+  font-weight: 600;
+  font-size: 0.95em;
   margin-bottom: 4px;
-  min-height: 1.1em;
 }
-.generation-progress .progress {
-  height: 8px;
-  background: rgba(0, 0, 0, 0.25);
+.gen-status {
+  font-size: 0.8em;
+  opacity: 0.85;
+  min-height: 1.2em;
+  margin-bottom: 8px;
+}
+.gen-progress {
+  height: 6px;
+  background: rgba(255,255,255,0.15);
   border-radius: 999px;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  margin-bottom: 10px;
 }
-.generation-progress .bar {
+.gen-progress .bar {
   height: 100%;
-  width: 0%;
+  width: 5%;
   background: #4a9eff;
-  transition: width 120ms linear;
+  transition: width 180ms linear;
 }
+.gen-steps {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.gen-steps .step {
+  font-size: 0.7em;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.1);
+  opacity: 0.6;
+}
+.gen-steps .step.active {
+  opacity: 1;
+  background: rgba(74, 158, 255, 0.25);
+}
+.gen-hint {
+  font-size: 0.7em;
+  opacity: 0.6;
+}
+
+/* General */
 .hidden { display: none !important; }

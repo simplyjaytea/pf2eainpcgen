@@ -10,5 +10,18 @@
   "PF2E.Actor.AiNpcGenerator.FailedDetails": "Generation failed: {message}",
   "PF2E.Actor.AiNpcGenerator.WarningsTitle": "Compendium Slug Warnings",
   "PF2E.Actor.AiNpcGenerator.WarningsIntro": "The following slugs could not be matched exactly and will be substituted or skipped:",
-  "PF2E.Actor.AiNpcGenerator.ProceedAnyway": "Proceed anyway?"
+  "PF2E.Actor.AiNpcGenerator.ProceedAnyway": "Proceed anyway?",
+
+  "PF2E.Actor.AiNpcGenerator.EncounterBuilder": "Encounter Builder",
+  "PF2E.Actor.AiNpcGenerator.EncounterBuilder.ComingSoon": "Coming soon",
+  "PF2E.Actor.AiNpcGenerator.EncounterBuilder.PartyLevel": "Party Level",
+  "PF2E.Actor.AiNpcGenerator.EncounterBuilder.NumNPCs": "Number of NPCs",
+  "PF2E.Actor.AiNpcGenerator.EncounterBuilder.Difficulty": "Difficulty",
+  "PF2E.Actor.AiNpcGenerator.EncounterBuilder.Build": "Build Encounter",
+  "PF2E.Actor.AiNpcGenerator.EncounterBuilder.Hint": "This will create a group of level-appropriate NPCs for an encounter.",
+  "PF2E.Actor.AiNpcGenerator.Gen.Contacting": "Contacting DeepSeek",
+  "PF2E.Actor.AiNpcGenerator.Gen.Resolving": "Resolving compendium items",
+  "PF2E.Actor.AiNpcGenerator.Gen.Creating": "Creating NPC",
+  "PF2E.Actor.AiNpcGenerator.Gen.Finalizing": "Finalizing",
+  "PF2E.Actor.AiNpcGenerator.Gen.Hint": "This usually takes a few seconds."
 }

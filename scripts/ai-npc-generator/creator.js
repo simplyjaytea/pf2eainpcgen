@@ -1,27 +1,34 @@
 // src/ai-npc-generator/creator.ts
 // Standalone creator (no @ imports)
-const WEAPONS = "pf2e.equipment-srd";
+const EQUIPMENT = "pf2e.equipment-srd";
 const ACTIONS = "pf2e.actionspf2e";
 const SPELLS = "pf2e.spells-srd";
+const FEATS = "pf2e.feats-srd";
 function slugify(s) {
     return (s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 function clamp(n, lo, hi) {
     return Math.max(lo, Math.min(hi, n));
 }
-async function resolveWeapon(ai) {
+async function resolveFromPack(packId, ai, expectedType) {
     const want = slugify(ai.system?.slug || ai.name);
-    const pack = game.packs.get(WEAPONS);
+    const pack = game.packs.get(packId);
     if (!pack)
         return null;
-    const idx = await pack.getIndex({ fields: ["system.slug"] });
+    const idx = await pack.getIndex({ fields: ["system.slug", "type"] });
     let hit = idx.find((e) => (e.system?.slug || slugify(e.name)) === want);
     if (!hit)
         hit = idx.find((e) => (e.name || "").toLowerCase() === ai.name.toLowerCase());
     if (!hit)
         return null;
+    if (expectedType && hit.type && hit.type !== expectedType)
+        return null;
     const doc = await pack.getDocument(hit._id);
-    if (!doc || doc.type !== "weapon")
+    return doc || null;
+}
+async function resolveWeapon(ai) {
+    const doc = await resolveFromPack(EQUIPMENT, ai, "weapon");
+    if (!doc)
         return null;
     const clone = doc.clone({}, { keepId: false });
     const d = ai.system?.damage || {};
@@ -35,6 +42,15 @@ async function resolveWeapon(ai) {
     if (Array.isArray(ai.system?.traits?.value)) {
         clone.updateSource({ "system.traits.value": ai.system.traits.value });
     }
+    return clone;
+}
+async function resolveArmor(ai) {
+    const doc = await resolveFromPack(EQUIPMENT, ai, "armor");
+    if (!doc)
+        return null;
+    const clone = doc.clone({}, { keepId: false });
+    // Mark as worn
+    clone.updateSource({ "system.equipped": { inSlot: true, invested: null } });
     return clone;
 }
 function synthesizeMelee(ai, level) {
@@ -85,7 +101,16 @@ async function resolveSpell(ai) {
     return doc ? doc.toObject() : null;
 }
 async function resolveConsumable(ai) {
+    const doc = await resolveFromPack(EQUIPMENT, ai, "consumable");
+    if (doc)
+        return doc.toObject();
     return { type: "consumable", name: ai.name, system: { quantity: 1, consumableType: { value: "other" }, traits: { value: [] } } };
+}
+async function resolveFeat(ai) {
+    const doc = await resolveFromPack(FEATS, ai, "feat");
+    if (doc)
+        return doc.toObject();
+    return { type: "feat", name: ai.name, system: { slug: slugify(ai.name), description: { value: "" }, traits: { value: [] } } };
 }
 function calcDC(level) {
     try {
@@ -127,10 +152,20 @@ export async function createNpcFromResolved(schema, { promptUsed = "" } = {}) {
         else if (it.type === "melee") {
             toCreate.push(synthesizeMelee(it, level));
         }
+        else if (it.type === "armor") {
+            const a = await resolveArmor(it);
+            if (a)
+                toCreate.push(a.toObject());
+        }
         else if (it.type === "action") {
             const a = await resolveAction(it);
             if (a)
                 toCreate.push(a);
+        }
+        else if (it.type === "feat") {
+            const f = await resolveFeat(it);
+            if (f)
+                toCreate.push(f);
         }
         else if (it.type === "spell") {
             const s = await resolveSpell(it);

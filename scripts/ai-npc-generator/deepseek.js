@@ -3,7 +3,19 @@
 const DEEPSEEK_BASE = "https://api.deepseek.com";
 const DEFAULT_MODEL = "deepseek-v4-pro";
 const SYSTEM_PROMPT = `You are an expert Pathfinder 2e NPC designer.
-You MUST output ONLY valid JSON matching this exact schema (no markdown, no extra text):
+Create a complete, playable, level-appropriate NPC.
+
+Core rules:
+- Output ONLY valid JSON. No markdown, no extra text.
+- Choose items from PF2e compendiums (use real slugs/names when possible).
+- Weapons, armor, consumables, feats, and actions must be reasonable for the level.
+- Include at least one reliable attack (weapon preferred; fallback natural attack is OK).
+- Add 1-3 useful feats or class features when they fit.
+- Add armor if it makes sense for the concept.
+- Add 0-3 consumables that are actually useful in combat or exploration.
+- Keep it simple and effective. No over-optimization.
+
+Required JSON schema (exact keys):
 
 {
   "name": string,
@@ -13,7 +25,7 @@ You MUST output ONLY valid JSON matching this exact schema (no markdown, no extr
   "size": "tiny" | "sm" | "med" | "lg" | "huge" | "grg" | undefined,
   "items": [
     {
-      "type": "weapon" | "melee" | "action" | "spellcastingEntry" | "spell" | "lore" | "consumable",
+      "type": "weapon" | "melee" | "armor" | "action" | "feat" | "spellcastingEntry" | "spell" | "lore" | "consumable",
       "name": string,
       "system": {
         "slug": string?,
@@ -23,6 +35,7 @@ You MUST output ONLY valid JSON matching this exact schema (no markdown, no extr
     }
   ]
 }
+
 The word "json" appears in this prompt.`;
 export class DeepSeekClient {
     apiKey;
@@ -36,9 +49,11 @@ export class DeepSeekClient {
         this.maxRetries = maxRetries;
     }
     async generateNpc(prompt, level) {
-        const userPrompt = `Create a Pathfinder 2e NPC at level ${level}.
-User concept: ${prompt || "a generic appropriate foe"}
-Return ONLY the JSON object.`;
+        const base = `Design a solid, playable Pathfinder 2e NPC at level ${level}. Follow the system guidelines strictly.`;
+        const userMod = prompt?.trim()
+            ? `User concept / additional instructions: ${prompt.trim()}`
+            : `Create a generic but interesting and effective foe for this level.`;
+        const userPrompt = `${base}\n${userMod}\nReturn ONLY the JSON object.`;
         let lastErr;
         for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
             try {

@@ -10,9 +10,10 @@ interface ResolveResult {
 }
 
 const PACKS = {
-    weapons: "pf2e.equipment-srd",
+    equipment: "pf2e.equipment-srd",
     actions: "pf2e.actionspf2e",
     spells: "pf2e.spells-srd",
+    feats: "pf2e.feats-srd",
 };
 const FIELDS = ["system.slug", "name", "type"];
 
@@ -44,25 +45,26 @@ export async function resolveNpcData(schema: DeepSeekNpcSchema): Promise<Resolve
     const warnings: string[] = [];
     const resolved: DeepSeekNpcSchema = { ...schema, items: [] };
 
-    const [wMap, aMap, sMap] = await Promise.all([
-        getIndexMap(PACKS.weapons),
+    const [eqMap, aMap, sMap, fMap] = await Promise.all([
+        getIndexMap(PACKS.equipment),
         getIndexMap(PACKS.actions),
         getIndexMap(PACKS.spells),
+        getIndexMap(PACKS.feats),
     ]);
 
     for (const it of schema.items || []) {
         const copy: any = JSON.parse(JSON.stringify(it || {}));
         const sys = copy.system || (copy.system = {});
 
-        if (it.type === "weapon" && sys.slug) {
+        if ((it.type === "weapon" || it.type === "armor" || it.type === "consumable") && sys.slug) {
             const want = slugify(sys.slug);
-            if (!wMap.has(want)) {
-                const alt = findClosest(want, wMap);
+            if (!eqMap.has(want)) {
+                const alt = findClosest(want, eqMap);
                 if (alt && alt !== want) {
-                    warnings.push(`Weapon slug "${want}" not found; using "${alt}"`);
+                    warnings.push(`${it.type} slug "${want}" not found; using "${alt}"`);
                     sys.slug = alt;
                 } else {
-                    warnings.push(`Weapon slug "${want}" not found; name-match or unresolved.`);
+                    warnings.push(`${it.type} slug "${want}" not found; name-match or unresolved.`);
                 }
             }
         }
@@ -72,6 +74,16 @@ export async function resolveNpcData(schema: DeepSeekNpcSchema): Promise<Resolve
                 const alt = findClosest(want, aMap);
                 if (alt && alt !== want) {
                     warnings.push(`Action slug "${want}" not found; using "${alt}"`);
+                    sys.slug = alt;
+                }
+            }
+        }
+        if (it.type === "feat" && sys.slug) {
+            const want = slugify(sys.slug);
+            if (!fMap.has(want)) {
+                const alt = findClosest(want, fMap);
+                if (alt && alt !== want) {
+                    warnings.push(`Feat slug "${want}" not found; using "${alt}"`);
                     sys.slug = alt;
                 }
             }
@@ -90,7 +102,7 @@ export async function resolveNpcData(schema: DeepSeekNpcSchema): Promise<Resolve
         resolved.items.push(copy);
     }
 
-    const hasWeapon = resolved.items.some((i) => i.type === "weapon");
+    const hasWeapon = resolved.items.some((i) => i.type === "weapon" || i.type === "melee");
     if (!hasWeapon) warnings.push("No weapons provided; NPC will use natural attacks only.");
 
     return { resolved, warnings };

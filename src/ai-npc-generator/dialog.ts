@@ -27,11 +27,30 @@ class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplication
         const ctx: any = await super._prepareContext(options);
         const lastPrompt = (game as any).settings.get("pf2e-ai-npc-generator", "lastPrompt") || "";
         const lastLevel = (game as any).settings.get("pf2e-ai-npc-generator", "lastLevel") || this.#defaultLevel();
+        const partyLevel = this.#defaultLevel();
+        const i18n = (game as any).i18n;
         return Object.assign(ctx, {
             rootId: "ai-npc-generator",
-            defaultLevel: this.#defaultLevel(),
+            defaultLevel: partyLevel,
+            partyLevel,
             lastPrompt,
             lastLevel,
+            encLabels: {
+                title: i18n?.localize("PF2E.Actor.AiNpcGenerator.EncounterBuilder") || "Encounter Builder",
+                coming: i18n?.localize("PF2E.Actor.AiNpcGenerator.EncounterBuilder.ComingSoon") || "Coming soon",
+                party: i18n?.localize("PF2E.Actor.AiNpcGenerator.EncounterBuilder.PartyLevel") || "Party Level",
+                num: i18n?.localize("PF2E.Actor.AiNpcGenerator.EncounterBuilder.NumNPCs") || "Number of NPCs",
+                diff: i18n?.localize("PF2E.Actor.AiNpcGenerator.EncounterBuilder.Difficulty") || "Difficulty",
+                build: i18n?.localize("PF2E.Actor.AiNpcGenerator.EncounterBuilder.Build") || "Build Encounter",
+                hint: i18n?.localize("PF2E.Actor.AiNpcGenerator.EncounterBuilder.Hint") || "This will create a group of level-appropriate NPCs for an encounter.",
+            },
+            genSteps: {
+                contact: i18n?.localize("PF2E.Actor.AiNpcGenerator.Gen.Contacting") || "Contacting DeepSeek",
+                resolve: i18n?.localize("PF2E.Actor.AiNpcGenerator.Gen.Resolving") || "Resolving compendium items",
+                create: i18n?.localize("PF2E.Actor.AiNpcGenerator.Gen.Creating") || "Creating NPC",
+                finalize: i18n?.localize("PF2E.Actor.AiNpcGenerator.Gen.Finalizing") || "Finalizing",
+                hint: i18n?.localize("PF2E.Actor.AiNpcGenerator.Gen.Hint") || "This usually takes a few seconds.",
+            },
         });
     }
 
@@ -70,21 +89,25 @@ class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplication
             const last = (game as any).settings.get("pf2e-ai-npc-generator", "lastLevel") || this.#defaultLevel();
             range.value = String(last);
         }
-        html.querySelector("a[data-action=toggle-advanced]")?.addEventListener("click", () => {
-            html.querySelector("section.advanced")?.classList.toggle("hidden");
-        });
+        // Keep preview in sync
+        this.#updateLevelPreview();
     }
 
-    _onChangeForm(config: any, ev: Event) {
-        super._onChangeForm?.(config, ev);
-        const lvlEl = (this.element as HTMLElement).querySelector("range-picker[name=level]") as any;
-        const prev = (this.element as HTMLElement).querySelector("[data-preview-level-dc]") as HTMLElement;
+    #updateLevelPreview() {
+        const html = this.element as HTMLElement;
+        const lvlEl = html.querySelector("range-picker[name=level]") as any;
+        const prev = html.querySelector("[data-preview-level-dc]") as HTMLElement;
         if (lvlEl && prev) {
             const lvl = Number(lvlEl.value || 1);
             const pwol = (game as any).pf2e?.settings?.variants?.pwol?.enabled;
             const dc = (game as any).pf2e?.dc?.calculateDC ? (game as any).pf2e.dc.calculateDC(lvl, { pwol }) : 14 + lvl;
             prev.textContent = `Level ${lvl} (DC ${dc})`;
         }
+    }
+
+    _onChangeForm(config: any, ev: Event) {
+        super._onChangeForm?.(config, ev);
+        this.#updateLevelPreview();
     }
 
     static async #onSubmit(this: NpcGeneratorDialog, ev: SubmitEvent, _form: HTMLFormElement, fd: any) {
@@ -107,29 +130,46 @@ class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplication
         }
 
         const html = this.element as HTMLElement;
-        const formSec = html.querySelector("section.standard-form") as HTMLElement | null;
-        const progWrap = html.querySelector("[data-generation-progress]") as HTMLElement | null;
-        const labelEl = html.querySelector("[data-progress-label]") as HTMLElement | null;
-        const barEl = html.querySelector("[data-progress-bar]") as HTMLElement | null;
-        const footerBtns = html.querySelectorAll("footer button");
+        const body = html.querySelector(".generator-body") as HTMLElement | null;
+        const overlay = html.querySelector("[data-generator-overlay]") as HTMLElement | null;
+        const statusEl = html.querySelector("[data-gen-status]") as HTMLElement | null;
+        const barEl = html.querySelector("[data-gen-bar]") as HTMLElement | null;
+        const titleEl = html.querySelector("[data-gen-title]") as HTMLElement | null;
+        const stepEls = {
+            contact: html.querySelector('[data-step="contact"]'),
+            resolve: html.querySelector('[data-step="resolve"]'),
+            create: html.querySelector('[data-step="create"]'),
+            finalize: html.querySelector('[data-step="finalize"]'),
+        } as Record<string, HTMLElement | null>;
 
-        function setProgress(key: string, pct: number) {
-            const msg = (game as any).i18n.localize(key) || key;
-            if (labelEl) labelEl.textContent = msg;
+        function setStep(step: keyof typeof stepEls) {
+            Object.values(stepEls).forEach(el => el?.classList.remove("active"));
+            stepEls[step]?.classList.add("active");
+        }
+        function setStatus(text: string, pct: number) {
+            if (statusEl) statusEl.textContent = text;
             if (barEl) barEl.style.width = `${Math.max(0, Math.min(100, Math.round(pct * 100)))}%`;
         }
+        if (titleEl) titleEl.textContent = (game as any).i18n?.localize("PF2E.Actor.AiNpcGenerator.Generating") || "Generating NPC…";
+        // prime step labels
+        const s = (k: string) => (game as any).i18n?.localize(`PF2E.Actor.AiNpcGenerator.Gen.${k}`) || k;
+        const map: Record<string, string> = { contact: "contact", resolve: "resolve", create: "create", finalize: "finalize" };
+        for (const [k, el] of Object.entries(stepEls)) {
+            if (el && (map as any)[k]) el.textContent = s((map as any)[k]);
+        }
 
-        // Switch UI to progress mode
-        if (formSec) formSec.classList.add("hidden");
-        if (progWrap) progWrap.classList.remove("hidden");
-        footerBtns.forEach((b: any) => b.disabled = true);
+        // Show modal overlay
+        if (body) body.style.opacity = "0.3";
+        if (overlay) overlay.classList.remove("hidden");
+        setStep("contact");
+        setStatus("Contacting DeepSeek", 0.08);
 
         const client = new DeepSeekClient(apiKey);
-        setProgress("PF2E.Actor.AiNpcGenerator.Generating", 0.05);
 
         try {
             const schema = await client.generateNpc(prompt, level);
-            setProgress("PF2E.Actor.AiNpcGenerator.Resolving", 0.4);
+            setStep("resolve");
+            setStatus("Resolving compendium items", 0.35);
 
             const { resolved, warnings } = await resolveNpcData(schema);
             if (warnings.length) {
@@ -141,32 +181,43 @@ class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplication
                     yes: { default: true },
                 });
                 if (!ok) {
-                    setProgress("Cancelled", 1);
-                    footerBtns.forEach((b: any) => b.disabled = false);
+                    setStatus("Cancelled", 1);
+                    if (overlay) overlay.classList.add("hidden");
+                    if (body) body.style.opacity = "1";
                     return;
                 }
             }
 
-            setProgress("PF2E.Actor.AiNpcGenerator.Creating", 0.7);
+            setStep("create");
+            setStatus((game as any).i18n?.localize("PF2E.Actor.AiNpcGenerator.Gen.Creating") || "Creating NPC", 0.65);
             const actor = await createNpcFromResolved(resolved, { promptUsed: prompt });
-            setProgress("PF2E.Actor.AiNpcGenerator.Done", 1);
+
+            setStep("finalize");
+            setStatus((game as any).i18n?.localize("PF2E.Actor.AiNpcGenerator.Gen.Finalizing") || "Finalizing", 0.92);
 
             ui.notifications.info(`Created ${actor.name}`);
             actor.sheet.render(true);
 
-            // Close after short delay so user sees 100%
+            // brief finish then close
             setTimeout(() => {
-                try {
-                    const app = (foundry as any)?.applications?.instances?.get?.("pf2e-ai-npc-generator");
-                    app?.close?.();
-                } catch { /* ignore */ }
-            }, 350);
+                try { (this as any).close(); } catch {}
+            }, 280);
         } catch (e: any) {
             console.error(e);
-            setProgress("PF2E.Actor.AiNpcGenerator.Failed", 1);
+            setStatus("Failed: " + (e?.message || e), 1);
             ui.notifications.error("PF2E.Actor.AiNpcGenerator.FailedDetails", { localize: true, format: { message: String(e?.message || e) } });
-            footerBtns.forEach((b: any) => b.disabled = false);
+            // leave overlay visible with failure so user can read it, allow close
         }
+    }
+
+    // Allow the user to close the dialog while the overlay is shown
+    _onClose(options: any) {
+        try {
+            const html = this.element as HTMLElement;
+            const overlay = html?.querySelector?.("[data-generator-overlay]") as HTMLElement | null;
+            if (overlay) overlay.classList.add("hidden");
+        } catch {}
+        return super._onClose(options);
     }
 }
 

@@ -4,9 +4,10 @@
 type DeepSeekNpcItem = { type: string; name: string; system?: any };
 type DeepSeekNpcSchema = { name: string; level: number; traits: string[]; description?: string; size?: any; items: DeepSeekNpcItem[] };
 
-const WEAPONS = "pf2e.equipment-srd";
+const EQUIPMENT = "pf2e.equipment-srd";
 const ACTIONS = "pf2e.actionspf2e";
 const SPELLS = "pf2e.spells-srd";
+const FEATS = "pf2e.feats-srd";
 
 function slugify(s: string) {
     return (s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -15,18 +16,23 @@ function clamp(n: number, lo: number, hi: number) {
     return Math.max(lo, Math.min(hi, n));
 }
 
-async function resolveWeapon(ai: DeepSeekNpcItem): Promise<any | null> {
+async function resolveFromPack(packId: string, ai: DeepSeekNpcItem, expectedType?: string): Promise<any | null> {
     const want = slugify(ai.system?.slug || ai.name);
-    const pack = (game as any).packs.get(WEAPONS);
+    const pack = (game as any).packs.get(packId);
     if (!pack) return null;
-    const idx = await pack.getIndex({ fields: ["system.slug"] });
+    const idx = await pack.getIndex({ fields: ["system.slug", "type"] });
     let hit = idx.find((e: any) => (e.system?.slug || slugify(e.name)) === want);
     if (!hit) hit = idx.find((e: any) => (e.name || "").toLowerCase() === ai.name.toLowerCase());
     if (!hit) return null;
+    if (expectedType && hit.type && hit.type !== expectedType) return null;
     const doc = await pack.getDocument(hit._id);
-    if (!doc || (doc as any).type !== "weapon") return null;
+    return doc || null;
+}
 
-    const clone: any = (doc as any).clone({}, { keepId: false });
+async function resolveWeapon(ai: DeepSeekNpcItem): Promise<any | null> {
+    const doc: any = await resolveFromPack(EQUIPMENT, ai, "weapon");
+    if (!doc) return null;
+    const clone: any = doc.clone({}, { keepId: false });
     const d = ai.system?.damage || {};
     if (d.damageType || d.dice || d.die) {
         clone.updateSource({
@@ -38,6 +44,15 @@ async function resolveWeapon(ai: DeepSeekNpcItem): Promise<any | null> {
     if (Array.isArray(ai.system?.traits?.value)) {
         clone.updateSource({ "system.traits.value": ai.system.traits.value });
     }
+    return clone;
+}
+
+async function resolveArmor(ai: DeepSeekNpcItem): Promise<any | null> {
+    const doc: any = await resolveFromPack(EQUIPMENT, ai, "armor");
+    if (!doc) return null;
+    const clone: any = doc.clone({}, { keepId: false });
+    // Mark as worn
+    clone.updateSource({ "system.equipped": { inSlot: true, invested: null } });
     return clone;
 }
 
@@ -89,7 +104,15 @@ async function resolveSpell(ai: DeepSeekNpcItem): Promise<any | null> {
 }
 
 async function resolveConsumable(ai: DeepSeekNpcItem): Promise<any> {
+    const doc: any = await resolveFromPack(EQUIPMENT, ai, "consumable");
+    if (doc) return doc.toObject();
     return { type: "consumable", name: ai.name, system: { quantity: 1, consumableType: { value: "other" }, traits: { value: [] } } };
+}
+
+async function resolveFeat(ai: DeepSeekNpcItem): Promise<any | null> {
+    const doc: any = await resolveFromPack(FEATS, ai, "feat");
+    if (doc) return doc.toObject();
+    return { type: "feat", name: ai.name, system: { slug: slugify(ai.name), description: { value: "" }, traits: { value: [] } } };
 }
 
 function calcDC(level: number) {
@@ -131,9 +154,15 @@ export async function createNpcFromResolved(schema: DeepSeekNpcSchema, { promptU
             }
         } else if (it.type === "melee") {
             toCreate.push(synthesizeMelee(it, level));
+        } else if (it.type === "armor") {
+            const a = await resolveArmor(it);
+            if (a) toCreate.push(a.toObject());
         } else if (it.type === "action") {
             const a = await resolveAction(it);
             if (a) toCreate.push(a);
+        } else if (it.type === "feat") {
+            const f = await resolveFeat(it);
+            if (f) toCreate.push(f);
         } else if (it.type === "spell") {
             const s = await resolveSpell(it);
             if (s) toCreate.push(s);
