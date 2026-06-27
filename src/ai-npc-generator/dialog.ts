@@ -12,6 +12,7 @@ function clamp(n: number, lo: number, hi: number) {
 class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) as any) {
     static DEFAULT_OPTIONS = {
         id: "pf2e-ai-npc-generator",
+        tag: "form",
         window: { icon: "fa-solid fa-dice-d20", title: "PF2E.Actor.AiNpcGenerator.Title", contentClasses: ["standard-form"] },
         position: { width: 480 },
         form: { handler: (NpcGeneratorDialog as any).#onSubmit, closeOnSubmit: false },
@@ -129,8 +130,9 @@ class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplication
         }
 
         const html = this.element as HTMLElement;
+        const root = html.querySelector(".generator-root") as HTMLElement | null;
         const body = html.querySelector(".generator-body") as HTMLElement | null;
-        const overlay = html.querySelector("[data-generator-overlay]") as HTMLElement | null;
+        const box = html.querySelector("[data-generator-overlay]") as HTMLElement | null;
         const statusEl = html.querySelector("[data-gen-status]") as HTMLElement | null;
         const barEl = html.querySelector("[data-gen-bar]") as HTMLElement | null;
         const titleEl = html.querySelector("[data-gen-title]") as HTMLElement | null;
@@ -157,9 +159,9 @@ class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplication
             if (el && (map as any)[k]) el.textContent = s((map as any)[k]);
         }
 
-        // Show modal overlay
+        // Show progress box (contained inside dialog, never full-inset)
         if (body) body.style.opacity = "0.3";
-        if (overlay) overlay.classList.remove("hidden");
+        if (box) box.classList.remove("hidden");
         setStep("contact");
         setStatus("Contacting DeepSeek", 0.08);
 
@@ -181,7 +183,7 @@ class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplication
                 });
                 if (!ok) {
                     setStatus("Cancelled", 1);
-                    if (overlay) overlay.classList.add("hidden");
+                    if (box) box.classList.add("hidden");
                     if (body) body.style.opacity = "1";
                     return;
                 }
@@ -209,12 +211,12 @@ class NpcGeneratorDialog extends (foundry.applications.api.HandlebarsApplication
         }
     }
 
-    // Allow the user to close the dialog while the overlay is shown
+    // Ensure progress box is hidden on close
     _onClose(options: any) {
         try {
             const html = this.element as HTMLElement;
-            const overlay = html?.querySelector?.("[data-generator-overlay]") as HTMLElement | null;
-            if (overlay) overlay.classList.add("hidden");
+            const box = html?.querySelector?.("[data-generator-overlay]") as HTMLElement | null;
+            if (box) box.classList.add("hidden");
         } catch {}
         return super._onClose(options);
     }

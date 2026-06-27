@@ -1,12 +1,11 @@
 /* PF2e AI NPC Generator - strict V2 Application only (no V1 FormApplication etc) */
 
-/* Strict V2: create a solid containing block for the internal overlay.
-   This prevents the absolute progress layer from escaping and affecting
-   sidebars or global UI layout. */
-#pf2e-ai-npc-generator,
-#pf2e-ai-npc-generator .window-content,
-#pf2e-ai-npc-generator .generator-content {
+/* Strict V2 only. The app root itself is positioned by Foundry.
+   We create our own local containing block for the overlay so it
+   cannot leak out and displace sidebars or global UI. */
+#pf2e-ai-npc-generator .generator-root {
   position: relative;
+  min-height: 260px;
 }
 
 #pf2e-ai-npc-generator .generator-body {
@@ -87,30 +86,28 @@
   margin-top: 4px;
 }
 
-/* Modal generating overlay */
-#pf2e-ai-npc-generator .generator-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  border-radius: inherit;
+/* Progress box (not full-inset). Contained inside .generator-root.
+   This avoids any global layout side-effects on sidebars or other windows. */
+#pf2e-ai-npc-generator .generator-root {
+  position: relative;
+  min-height: 260px;
 }
-#pf2e-ai-npc-generator .generator-overlay.hidden {
+#pf2e-ai-npc-generator .generator-progress-box {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border, #555);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #eee;
+  text-align: center;
+}
+#pf2e-ai-npc-generator .generator-progress-box.hidden {
   display: none !important;
 }
-#pf2e-ai-npc-generator .generator-overlay-content {
-  width: 82%;
-  max-width: 320px;
-  text-align: center;
-  color: #eee;
-}
 #pf2e-ai-npc-generator .gen-spinner {
-  width: 28px;
-  height: 28px;
-  margin: 0 auto 10px;
+  width: 24px;
+  height: 24px;
+  margin: 0 auto 8px;
   border: 3px solid rgba(255,255,255,0.2);
   border-top-color: #fff;
   border-radius: 50%;
@@ -164,3 +161,13 @@
   font-size: 0.7em;
   opacity: 0.6;
 }
+
+/* Critical: overlay is hidden by default. We toggle .hidden off when showing. */
+#pf2e-ai-npc-generator .hidden {
+  display: none !important;
+}
+
+/* Ensure the content box that contains the absolute overlay has a
+   positioning context and a minimum size so the overlay cannot escape
+   to a higher ancestor (e.g. body/sidebar) and wreck layout. */
+/* (the overlay lives inside .generator-root; no extra .generator-content needed) */

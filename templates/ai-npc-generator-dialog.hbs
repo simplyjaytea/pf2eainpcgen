@@ -1,4 +1,4 @@
-<div class="generator-content">
+<div class="generator-root">
   <div class="generator-body">
     <section class="standard-form">
       <div class="form-group">
@@ -12,7 +12,7 @@
       <div class="form-group level-row">
         <label>Level</label>
         <div class="form-fields">
-          <range-picker name="level" min="1" max="25" step="1" value="{{lastLevel}}"></range-picker>
+          <input type="range" name="level" min="1" max="25" step="1" value="{{lastLevel}}" />
           <span class="level-dc" data-preview-level-dc></span>
         </div>
         <p class="hint">1–25. Defaults to average party level (or player-owned PCs).</p>
@@ -52,20 +52,18 @@
     </section>
   </div>
 
-  <!-- Modal-style generating overlay -->
-  <div class="generator-overlay hidden" data-generator-overlay>
-    <div class="generator-overlay-content">
-      <div class="gen-spinner"></div>
-      <div class="gen-title" data-gen-title>Generating NPC…</div>
-      <div class="gen-status" data-gen-status>{{genSteps.contact}}</div>
-      <div class="gen-progress"><div class="bar" data-gen-bar style="width: 5%;"></div></div>
-      <div class="gen-steps">
-        <div data-step="contact" class="gen-step">{{genSteps.contact}}</div>
-        <div data-step="resolve" class="gen-step">{{genSteps.resolve}}</div>
-        <div data-step="create" class="gen-step">{{genSteps.create}}</div>
-        <div data-step="finalize" class="gen-step">{{genSteps.finalize}}</div>
-      </div>
-      <div class="gen-hint">{{genSteps.hint}}</div>
+  <!-- Progress box (centered, contained). Not full-inset to avoid layout side-effects on parent containers/sidebars. -->
+  <div class="generator-progress-box hidden" data-generator-overlay>
+    <div class="gen-spinner"></div>
+    <div class="gen-title" data-gen-title>Generating NPC…</div>
+    <div class="gen-status" data-gen-status>{{genSteps.contact}}</div>
+    <div class="gen-progress"><div class="bar" data-gen-bar style="width: 5%;"></div></div>
+    <div class="gen-steps">
+      <div data-step="contact" class="gen-step">{{genSteps.contact}}</div>
+      <div data-step="resolve" class="gen-step">{{genSteps.resolve}}</div>
+      <div data-step="create" class="gen-step">{{genSteps.create}}</div>
+      <div data-step="finalize" class="gen-step">{{genSteps.finalize}}</div>
     </div>
+    <div class="gen-hint">{{genSteps.hint}}</div>
   </div>
 </div>
